@@ -35,6 +35,6 @@ public class DeviceEntity {
     private StateDeviceEnum state;
 
     @Column(name = "creation_time", nullable = false, updatable = false, insertable = false)
-    private LocalDateTime creationTime;
+    private LocalDateTime creationTime = LocalDateTime.now();
 
 }
