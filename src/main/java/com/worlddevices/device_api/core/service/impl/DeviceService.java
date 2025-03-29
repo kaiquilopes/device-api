@@ -7,6 +7,9 @@ import com.worlddevices.device_api.core.domain.DeviceEntity;
 import com.worlddevices.device_api.core.enums.StateDeviceEnum;
 import com.worlddevices.device_api.core.repository.DeviceRepository;
 import com.worlddevices.device_api.core.service.IDeviceService;
+import com.worlddevices.device_api.core.strategy.state.StateBehaviorContext;
+import com.worlddevices.device_api.core.strategy.state.StateBehaviorStrategy;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,13 @@ public class DeviceService implements IDeviceService {
 
     private final MapperConverter mapper;
 
-    public DeviceService(DeviceRepository repository, MapperConverter mapper) {
+    private final StateBehaviorContext stateBehaviorContext;
+
+    public DeviceService(
+            DeviceRepository repository, MapperConverter mapper, StateBehaviorContext stateBehaviorContext) {
         this.repository = repository;
         this.mapper = mapper;
+        this.stateBehaviorContext = stateBehaviorContext;
     }
 
     @Override
@@ -37,21 +44,18 @@ public class DeviceService implements IDeviceService {
     @Override
     public ResponseEntity<DeviceResponse> updateDeviceById(Long id, DeviceRequest device) {
         log.info("Updating device with ID: {}", id);
-        Optional<DeviceEntity> deviceEntity = repository.findById(id);
-        if (deviceEntity.isPresent()) {
-            if (StateDeviceEnum.IN_USE.equals(deviceEntity.get().getState())) {
-                //TODO return exception this action is not allowed
-            }
-            DeviceResponse response = mapper.getDeviceModel(
-                    deviceEntity.map(deviceUpdate -> {
-                        deviceUpdate.setName(device.getName());
-                        deviceUpdate.setBrand(device.getBrand());
-                        deviceUpdate.setState(device.getState());
-                        return repository.save(deviceUpdate);
-                    }).get());
-            return ResponseEntity.ok(response);
+        DeviceEntity existingDevice =
+                repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Device not found"));
+
+        StateBehaviorStrategy strategy = stateBehaviorContext.getStrategy(existingDevice.getState());
+        if (!strategy.canUpdate(existingDevice)) {
+            throw new IllegalStateException("Update not allowed for state: " + existingDevice.getState());
         }
-        return ResponseEntity.noContent().build();
+
+        DeviceEntity updatedDevice = strategy.handleUpdate(
+                existingDevice, device.getName(), device.getBrand(), device.getState());
+        repository.save(updatedDevice);
+        return ResponseEntity.ok(mapper.getDeviceModel(updatedDevice));
     }
 
     @Override
@@ -101,14 +105,18 @@ public class DeviceService implements IDeviceService {
     }
 
     @Override
-    public ResponseEntity deleteDeviceById(Long id) {
+    public ResponseEntity<Void> deleteDeviceById(Long id) {
         log.info("Deleting device with ID: {}", id);
-        Optional<DeviceEntity> deviceEntity = repository.findById(id);
-        if (deviceEntity.isPresent() && StateDeviceEnum.INACTIVE.equals(deviceEntity.get().getState())) {
-            repository.deleteById(id);
-            return ResponseEntity.ok().build();
+        DeviceEntity device =
+                repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Device not found"));
+
+        StateBehaviorStrategy strategy = stateBehaviorContext.getStrategy(device.getState());
+        if (!strategy.canDelete(device)) {
+            throw new IllegalStateException("Deletion not allowed for state: " + device.getState());
         }
-        return ResponseEntity.noContent().build();
+
+        repository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
 }
