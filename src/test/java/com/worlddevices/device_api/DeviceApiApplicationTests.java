@@ -1,4 +1,4 @@
-package java.com.worlddevices.device_api;
+package com.worlddevices.device_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
