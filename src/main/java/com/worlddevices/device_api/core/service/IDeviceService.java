@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface IDeviceService {
 
-    DeviceResponse save(DeviceRequest device);
+    ResponseEntity<DeviceResponse> save(DeviceRequest device);
 
     ResponseEntity<DeviceResponse> updateDeviceById(Long id, DeviceRequest device);
 
-    ResponseEntity<DeviceResponse> updateDeviceStateById(Long id, StateDeviceEnum state);
+    ResponseEntity updateDeviceStateById(Long id, StateDeviceEnum state);
 
     ResponseEntity<DeviceResponse> getDeviceById(Long id);
 

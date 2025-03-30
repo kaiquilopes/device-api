@@ -21,7 +21,7 @@ public class MapperConfig {
             log.info("ModelMapper bean created successfully.");
             return modelMapper;
         } catch (Exception e) {
-            log.error("Error creating ModelMapper bean: {}", e.getMessage(), e);
+            log.error("Error creating ModelMapper bean: {}", e);
             throw e;
         }
     }

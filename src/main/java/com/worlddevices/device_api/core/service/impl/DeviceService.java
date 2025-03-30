@@ -5,14 +5,18 @@ import com.worlddevices.device_api.api.dto.response.DeviceResponse;
 import com.worlddevices.device_api.api.mapper.MapperConverter;
 import com.worlddevices.device_api.core.domain.DeviceEntity;
 import com.worlddevices.device_api.core.enums.StateDeviceEnum;
+import com.worlddevices.device_api.core.exception.InvalidDeviceStateException;
 import com.worlddevices.device_api.core.repository.DeviceRepository;
 import com.worlddevices.device_api.core.service.IDeviceService;
 import com.worlddevices.device_api.core.strategy.state.StateBehaviorContext;
 import com.worlddevices.device_api.core.strategy.state.StateBehaviorStrategy;
+import com.worlddevices.device_api.core.validation.DeviceStateValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +39,10 @@ public class DeviceService implements IDeviceService {
     }
 
     @Override
-    public DeviceResponse save(DeviceRequest device) {
+    public ResponseEntity<DeviceResponse> save(DeviceRequest device) {
         log.info("Saving device: {}", device.getName());
-        DeviceEntity entity = mapper.getRequestDeviceEntity(device);
-        return mapper.getDeviceModel(repository.save(entity));
+        DeviceEntity entity = mapper.convertToDeviceEntity(device);
+        return ResponseEntity.ok(mapper.convertToDeviceResponse(repository.save(entity)));
     }
 
     @Override
@@ -55,19 +59,24 @@ public class DeviceService implements IDeviceService {
         DeviceEntity updatedDevice = strategy.handleUpdate(
                 existingDevice, device.getName(), device.getBrand(), device.getState());
         repository.save(updatedDevice);
-        return ResponseEntity.ok(mapper.getDeviceModel(updatedDevice));
+        return ResponseEntity.ok(mapper.convertToDeviceResponse(updatedDevice));
     }
 
     @Override
-    public ResponseEntity updateDeviceStateById(Long id, StateDeviceEnum state) {
+    public ResponseEntity<Void> updateDeviceStateById(Long id, StateDeviceEnum state) {
         log.info("Updating device ID: {} to state {}", id, state);
-        Optional<DeviceEntity> deviceEntity = repository.findById(id);
+        Optional<DeviceEntity> deviceOptional = repository.findById(id);
 
-        deviceEntity.ifPresentOrElse(device -> {
-            device.setState(state);
-            repository.save(device);
-        }, () -> ResponseEntity.noContent());
+        if(deviceOptional.isEmpty()){
+            log.warn("Device with ID {} not found for state update", id);
+            return ResponseEntity.noContent().build();
+        }
 
+        DeviceEntity device = deviceOptional.get();
+        device.setState(state);
+        repository.save(device);
+
+        log.info("Updated state of device ID {} to {}", id, state);
         return ResponseEntity.ok().build();
     }
 
@@ -76,7 +85,7 @@ public class DeviceService implements IDeviceService {
         log.info("Fetching device with ID: {}", id);
         Optional<DeviceEntity> deviceEntity = repository.findById(id);
         if (deviceEntity.isPresent()) {
-            return ResponseEntity.ok(mapper.getDeviceModel(deviceEntity.get()));
+            return ResponseEntity.ok(mapper.convertToDeviceResponse(deviceEntity.get()));
         }
         return ResponseEntity.noContent().build();
     }
@@ -85,22 +94,29 @@ public class DeviceService implements IDeviceService {
     public ResponseEntity<List<DeviceResponse>> getDevices(String brand, String state) {
         List<DeviceEntity> devices;
 
-        if (brand != null && state != null) {
-            log.info("Request to fetch devices by brand: {} and state: {}", brand, state);
-            devices = repository.findByBrandAndState(brand, StateDeviceEnum.valueOf(state));
-        } else if (brand != null) {
-            log.info("Request to fetch the device by brand: {}", brand);
-            devices = repository.findByBrand(brand);
-        } else if (state != null) {
-            log.info("Request to fetch the device by state: {}", state);
-            devices = repository.findByState(StateDeviceEnum.valueOf(state));
-        } else {
-            log.info("Request to fetch all devices");
-            devices = repository.findAll();
+        try{
+            if (brand != null && state != null) {
+                StateDeviceEnum validatedState = DeviceStateValidator.validate(state);
+                log.info("Request to fetch devices by brand: {} and state: {}", brand, validatedState);
+                devices = repository.findByBrandAndState(brand, validatedState);
+            } else if (brand != null) {
+                log.info("Request to fetch the device by brand: {}", brand);
+                devices = repository.findByBrand(brand);
+            } else if (state != null) {
+                StateDeviceEnum validatedState = DeviceStateValidator.validate(state);
+                log.info("Request to fetch the device by state: {}", validatedState);
+                devices = repository.findByState(validatedState);
+            } else {
+                log.info("Request to fetch all devices");
+                devices = repository.findAll();
+            }
+            if(!devices.isEmpty()){
+                return ResponseEntity.ok(mapper.convertAllToDeviceResponse(devices));
+            }
+        } catch (InvalidDeviceStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        if(!devices.isEmpty()){
-            return ResponseEntity.ok(mapper.getListDevicesModel(devices));
-        }
+
         return ResponseEntity.noContent().build();
     }
 

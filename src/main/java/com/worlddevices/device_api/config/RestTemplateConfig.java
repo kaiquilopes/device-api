@@ -37,7 +37,7 @@ public class RestTemplateConfig {
             log.info("RestTemplate bean created successfully with MappingJackson2HttpMessageConverter.");
             return restTemplate;
         } catch (Exception e) {
-            log.error("Error creating RestTemplate bean: {}", e.getMessage(), e);
+            log.error("Error creating RestTemplate bean: {}", e);
             throw e;
         }
     }

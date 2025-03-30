@@ -21,23 +21,16 @@ public class MapperConverter {
         this.mapper = mapper;
     }
 
-    public DeviceResponse getDeviceModel(DeviceEntity device){
+    public DeviceResponse convertToDeviceResponse(DeviceEntity device){
         return mapper.map(device, DeviceResponse.class);
     }
 
-    public DeviceEntity getDeviceEntity(DeviceResponse device){
+    public DeviceEntity convertToDeviceEntity(DeviceRequest device){
         return mapper.map(device, DeviceEntity.class);
     }
 
-    public DeviceEntity getRequestDeviceEntity(DeviceRequest device){
-        return mapper.map(device, DeviceEntity.class);
+    public List<DeviceResponse> convertAllToDeviceResponse(List<DeviceEntity> devices){
+        return devices.stream().map(this::convertToDeviceResponse).collect(Collectors.toList());
     }
 
-    public List<DeviceResponse> getListDevicesModel(List<DeviceEntity> devices){
-        return devices.stream().map(this::getDeviceModel).collect(Collectors.toList());
-    }
-
-    public List<DeviceEntity> getListDevicesEntity(List<DeviceResponse> devices){
-        return devices.stream().map(this::getDeviceEntity).collect(Collectors.toList());
-    }
 }

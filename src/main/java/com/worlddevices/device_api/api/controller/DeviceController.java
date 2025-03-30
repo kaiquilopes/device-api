@@ -2,7 +2,6 @@ package com.worlddevices.device_api.api.controller;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
-import com.worlddevices.device_api.core.enums.StateDeviceEnum;
 import com.worlddevices.device_api.core.service.IDeviceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ public class DeviceController {
     }
 
     @PostMapping
-    public DeviceResponse saveDevice(@RequestBody DeviceRequest device) {
+    public ResponseEntity<DeviceResponse> saveDevice(@RequestBody DeviceRequest device) {
         log.info("Request to save device: {}", device.getName());
         return service.save(device);
     }
@@ -34,9 +33,9 @@ public class DeviceController {
     }
 
     @PutMapping("/change-state/{id}")
-    public ResponseEntity<DeviceResponse> updateDeviceStateById(@PathVariable Long id, @RequestBody StateDeviceEnum state) {
-        log.info("Request to update device state by id: {} with state details: {}", id, state);
-        return service.updateDeviceStateById(id, state);
+    public ResponseEntity<Void> updateDeviceStateById(@PathVariable Long id, @RequestBody DeviceRequest device) {
+        log.info("Request to update device state by id: {} with state details: {}", id, device.getState());
+        return service.updateDeviceStateById(id, device.getState());
     }
 
     @GetMapping("/{id}")
@@ -48,7 +47,7 @@ public class DeviceController {
     @GetMapping
     public ResponseEntity<List<DeviceResponse>> getDevices(
             @RequestParam(required = false) String brand, @RequestParam(required = false) String state) {
-        log.info("Request to fetch devices by parameter");
+        log.info("Fetching devices with filters: brand={}, state={}", brand, state);
         return service.getDevices(brand, state);
     }
 
