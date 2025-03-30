@@ -1,7 +1,9 @@
 package com.worlddevices.device_api.api.openapi;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
+import com.worlddevices.device_api.api.dto.request.DeviceStateUpdateRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
+import com.worlddevices.device_api.core.enums.StateDeviceEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,7 +36,7 @@ public interface IDeviceControllerOpenApi {
     })
     ResponseEntity<Void> updateDeviceStateById(
             @Parameter(description = "Device ID", required = true, in = ParameterIn.PATH, example = "10") Long id,
-            DeviceRequest device);
+            DeviceStateUpdateRequest request);
 
     @Operation(summary = "Fetch a single device by ID",  responses = {
             @ApiResponse(responseCode = "200", description = "Device fetched successfully"),

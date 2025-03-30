@@ -1,6 +1,7 @@
 package com.worlddevices.device_api.api.controller;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
+import com.worlddevices.device_api.api.dto.request.DeviceStateUpdateRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
 import com.worlddevices.device_api.api.openapi.IDeviceControllerOpenApi;
 import com.worlddevices.device_api.core.service.IDeviceService;
@@ -25,22 +26,25 @@ public class DeviceController implements IDeviceControllerOpenApi {
     @Override
     @PostMapping
     public ResponseEntity<DeviceResponse> saveDevice(@RequestBody @Valid DeviceRequest device) {
-        log.info("Request to save device: {}", device.getName());
+        log.info("Request to save device: {}", device.name());
         return service.save(device);
     }
 
     @Override
     @PutMapping("/{id}")
-    public ResponseEntity<DeviceResponse> updateDeviceById(@PathVariable Long id, @RequestBody DeviceRequest device) {
+    public ResponseEntity<DeviceResponse> updateDeviceById(
+            @PathVariable Long id,
+            @RequestBody @Valid DeviceRequest device) {
         log.info("Request to update device by id: {} with details: {}", id, device);
         return service.updateDeviceById(id, device);
     }
 
     @Override
-    @PutMapping("/change-state/{id}") //TODO  improve this method to dont pass all object
-    public ResponseEntity<Void> updateDeviceStateById(@PathVariable Long id, @RequestBody DeviceRequest device) {
-        log.info("Request to update device state by id: {} with state details: {}", id, device.getState());
-        return service.updateDeviceStateById(id, device.getState());
+    @PutMapping("/change-state/{id}")
+    public ResponseEntity<Void> updateDeviceStateById(
+            @PathVariable Long id, @RequestBody @Valid DeviceStateUpdateRequest request) {
+        log.info("Request to update device state by id: {} with state details: {}", id, request.state());
+        return service.updateDeviceStateById(id, request.state());
     }
 
     @Override

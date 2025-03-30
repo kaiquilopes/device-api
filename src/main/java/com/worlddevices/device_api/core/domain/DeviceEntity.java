@@ -2,15 +2,17 @@ package com.worlddevices.device_api.core.domain;
 
 import com.worlddevices.device_api.core.enums.StateDeviceEnum;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 /**
  * Entity class representing a device.
  */
-@Data
+
+@Getter @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "device")

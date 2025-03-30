@@ -19,17 +19,43 @@ public class MapperConverter {
 
     public MapperConverter(ModelMapper mapper) {
         this.mapper = mapper;
+        configureModelMapper();
     }
 
-    public DeviceResponse convertToDeviceResponse(DeviceEntity device){
+    /** Method to handle record convert class */
+    private void configureModelMapper() {
+        mapper.createTypeMap(DeviceEntity.class, DeviceResponse.class)
+                .setConverter(context -> {
+                    DeviceEntity source = context.getSource();
+                    return new DeviceResponse(
+                            source.getId(),
+                            source.getName(),
+                            source.getBrand(),
+                            source.getState(),
+                            source.getCreationTime()
+                    );
+                });
+
+        mapper.createTypeMap(DeviceRequest.class, DeviceEntity.class)
+                .setConverter(context -> {
+                    DeviceRequest source = context.getSource();
+                    DeviceEntity destination = new DeviceEntity();
+                    destination.setName(source.name());
+                    destination.setBrand(source.brand());
+                    destination.setState(source.state());
+                    return destination;
+                });
+    }
+
+    public DeviceResponse convertToDeviceResponse(DeviceEntity device) {
         return mapper.map(device, DeviceResponse.class);
     }
 
-    public DeviceEntity convertToDeviceEntity(DeviceRequest device){
+    public DeviceEntity convertToDeviceEntity(DeviceRequest device) {
         return mapper.map(device, DeviceEntity.class);
     }
 
-    public List<DeviceResponse> convertAllToDeviceResponse(List<DeviceEntity> devices){
+    public List<DeviceResponse> convertAllToDeviceResponse(List<DeviceEntity> devices) {
         return devices.stream().map(this::convertToDeviceResponse).collect(Collectors.toList());
     }
 
