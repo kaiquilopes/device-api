@@ -84,7 +84,9 @@ class DeviceServiceTest {
 
         when(repository.findAll()).thenReturn(Collections.emptyList());
 
-        service.getDevices(null, null);
+        ResponseEntity<List<DeviceResponse>> response = service.getDevices(null, null);
+        assertNotNull(response);
+
         verify(repository, never()).findByBrandAndState(anyString(), any(StateDeviceEnum.class));
         verify(repository, never()).findByBrand(anyString());
         verify(repository, never()).findByState(any(StateDeviceEnum.class));
@@ -107,10 +109,25 @@ class DeviceServiceTest {
 
     @Test
     void getDevicesTest() {
+        List<DeviceEntity> deviceEntity = buildListDeviceEntity();
+        when(repository.findAll()).thenReturn(deviceEntity);
 
-        when(repository.findAll()).thenReturn(buildListDeviceEntity());
+        List<DeviceResponse> devicesResponse = new ArrayList<>();
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "iPhone 15", "Apple", StateDeviceEnum.AVAILABLE, LocalDateTime.now());
+        devicesResponse.add(deviceResponse);
+        when(mapper.convertAllToDeviceResponse(anyList())).thenReturn(devicesResponse);
 
-        service.getDevices(null, null);
+        ResponseEntity<List<DeviceResponse>> response = service.getDevices(null, null);
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse listActualResponse = response.getBody().get(0);
+        assertEquals(deviceEntity.get(0).getId(), listActualResponse.id());
+        assertEquals(deviceEntity.get(0).getName(), listActualResponse.name());
+        assertEquals(deviceEntity.get(0).getBrand(), listActualResponse.brand());
+        assertEquals(deviceEntity.get(0).getState(), listActualResponse.state());
+
         verify(repository, never()).findByBrandAndState(anyString(), any(StateDeviceEnum.class));
         verify(repository, never()).findByBrand(anyString());
         verify(repository, never()).findByState(any(StateDeviceEnum.class));
@@ -121,9 +138,25 @@ class DeviceServiceTest {
     @Test
     void getDevicesStateTest() {
 
-        when(repository.findByState(any(StateDeviceEnum.class))).thenReturn(buildListDeviceEntity());
+        List<DeviceEntity> deviceEntity = buildListDeviceEntity();
+        when(repository.findByState(any(StateDeviceEnum.class))).thenReturn(deviceEntity);
 
-        service.getDevices(null, "AVAILABLE");
+        List<DeviceResponse> devicesResponse = new ArrayList<>();
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "iPhone 15", "Apple", StateDeviceEnum.AVAILABLE, LocalDateTime.now());
+        devicesResponse.add(deviceResponse);
+        when(mapper.convertAllToDeviceResponse(anyList())).thenReturn(devicesResponse);
+
+        ResponseEntity<List<DeviceResponse>> response = service.getDevices(null, "AVAILABLE");
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse listActualResponse = response.getBody().get(0);
+        assertEquals(deviceEntity.get(0).getId(), listActualResponse.id());
+        assertEquals(deviceEntity.get(0).getName(), listActualResponse.name());
+        assertEquals(deviceEntity.get(0).getBrand(), listActualResponse.brand());
+        assertEquals(deviceEntity.get(0).getState(), listActualResponse.state());
+
         verify(repository, never()).findByBrandAndState(anyString(), any(StateDeviceEnum.class));
         verify(repository, never()).findByBrand(anyString());
         verify(repository, times(1)).findByState(any(StateDeviceEnum.class));
@@ -134,9 +167,25 @@ class DeviceServiceTest {
     @Test
     void getDevicesBrandTest() {
 
-        when(repository.findByBrand(anyString())).thenReturn(buildListDeviceEntity());
+        List<DeviceEntity> deviceEntity = buildListDeviceEntity();
+        when(repository.findByBrand(anyString())).thenReturn(deviceEntity);
 
-        service.getDevices("Xiaomi", null);
+        List<DeviceResponse> devicesResponse = new ArrayList<>();
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "iPhone 15", "Apple", StateDeviceEnum.AVAILABLE, LocalDateTime.now());
+        devicesResponse.add(deviceResponse);
+        when(mapper.convertAllToDeviceResponse(anyList())).thenReturn(devicesResponse);
+
+        ResponseEntity<List<DeviceResponse>> response = service.getDevices("Xiaomi", null);
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse listActualResponse = response.getBody().get(0);
+        assertEquals(deviceEntity.get(0).getId(), listActualResponse.id());
+        assertEquals(deviceEntity.get(0).getName(), listActualResponse.name());
+        assertEquals(deviceEntity.get(0).getBrand(), listActualResponse.brand());
+        assertEquals(deviceEntity.get(0).getState(), listActualResponse.state());
+
         verify(repository, never()).findByBrandAndState(anyString(), any(StateDeviceEnum.class));
         verify(repository, times(1)).findByBrand(anyString());
         verify(repository, never()).findByState(any(StateDeviceEnum.class));
@@ -147,10 +196,27 @@ class DeviceServiceTest {
     @Test
     void getDevicesBrandAndStateTest() {
 
+        List<DeviceEntity> deviceEntity = buildListDeviceEntity();
+        deviceEntity.get(0).setState(StateDeviceEnum.IN_USE);
         when(repository.findByBrandAndState(anyString(), any(StateDeviceEnum.class)))
-                .thenReturn(buildListDeviceEntity());
+                .thenReturn(deviceEntity);
 
-        service.getDevices("Xiaomi", "IN_USE");
+        List<DeviceResponse> devicesResponse = new ArrayList<>();
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "iPhone 15", "Apple", StateDeviceEnum.IN_USE, LocalDateTime.now());
+        devicesResponse.add(deviceResponse);
+        when(mapper.convertAllToDeviceResponse(anyList())).thenReturn(devicesResponse);
+
+        ResponseEntity<List<DeviceResponse>> response = service.getDevices("Xiaomi", "IN_USE");
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse listActualResponse = response.getBody().get(0);
+        assertEquals(deviceEntity.get(0).getId(), listActualResponse.id());
+        assertEquals(deviceEntity.get(0).getName(), listActualResponse.name());
+        assertEquals(deviceEntity.get(0).getBrand(), listActualResponse.brand());
+        assertEquals(deviceEntity.get(0).getState(), listActualResponse.state());
+
         verify(repository, times(1)).findByBrandAndState(anyString(), any(StateDeviceEnum.class));
         verify(repository, never()).findByBrand(anyString());
         verify(repository, never()).findByState(any(StateDeviceEnum.class));
