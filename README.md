@@ -35,16 +35,11 @@ Before running the project, ensure the following tools are installed:
   docker compose up
    ```
 
-#### 4. Access the Application:
-   - **API:** http://localhost:8080/api
-   - **MySQL:** localhost:3306
-      * **Username:** root
-      * **Password:** q1w2e3r4t5
-      * **Database:** world_devices
-
-#### 5. Access MySQL Shell:
+#### 4. Access MySQL Shell:
    ```sh
   docker compose exec db mysql -uroot -pq1w2e3r4t5 world_devices
+  use world_devices
+  select * from device;
    ```
 
 ## Docker
