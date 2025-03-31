@@ -8,7 +8,6 @@ ___
    - [API Endpoints](#api-endpoints)
    - [Swagger Documentation](#swagger-documentation)
    - [MySQL Database](#mysql-database)
-   - [Code Structure](#code-structure)
    - [Design Patterns](#design-patterns)
    - [SOLID Principles](#solid-principles)
    - [Customization](#customization)
@@ -87,29 +86,6 @@ The API documentation is available through Swagger.
 
 ## MySQL Database
 The project uses MySQL as the database. The `application.properties` file defines the database configuration
-
-## Code Structure
-The project follows a clean and modular structure:
-src/main/java/com/worlddevices/device_api/
-?
-??? api/
-?   ??? controller/               # REST controllers
-?   ??? dto/                      # Data Transfer Objects (DTOs)
-?   ??? mapper/                   # Mapper for converting entities to DTOs
-?   ??? openapi/                  # OpenAPI interfaces for Swagger documentation
-?
-??? config/                       # Configuration classes (ModelMapper, RestTemplate, etc.)
-?
-??? core/
-?   ??? domain/                   # Entity classes (e.g., DeviceEntity)
-?   ??? enums/                    # Enumerations (e.g., StateDeviceEnum)
-?   ??? exception/                # Custom exceptions
-?   ??? repository/               # JPA repositories
-?   ??? service/                  # Service interfaces and implementations
-?   ??? strategy/                 # State behavior strategies (Strategy pattern)
-?   ??? validation/               # Validation utilities
-?
-??? DeviceApiApplication.java     # Main application class
 
 ## Design Patterns
 ### Strategy Pattern
