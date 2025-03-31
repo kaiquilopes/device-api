@@ -1,0 +1,24 @@
+services:
+  app:
+    image: device-api
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: q1w2e3r4t5
+      MYSQL_DATABASE: world_devices
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./world_devices.sql:/docker-entrypoint-initdb.d/world_devices.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 1s
+      retries: 10

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -36,7 +37,8 @@ public class DeviceEntity {
     @Column(name = "state", columnDefinition = "ENUM('AVAILABLE','IN_USE','INACTIVE')", nullable = false)
     private StateDeviceEnum state;
 
+    @CreationTimestamp
     @Column(name = "creation_time", nullable = false, updatable = false, insertable = false)
-    private LocalDateTime creationTime = LocalDateTime.now();
+    private LocalDateTime creationTime;
 
 }
