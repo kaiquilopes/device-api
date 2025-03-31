@@ -37,8 +37,7 @@ public class DeviceEntity {
     @Column(name = "state", columnDefinition = "ENUM('AVAILABLE','IN_USE','INACTIVE')", nullable = false)
     private StateDeviceEnum state;
 
-    @CreationTimestamp
     @Column(name = "creation_time", nullable = false, updatable = false, insertable = false)
-    private LocalDateTime creationTime;
+    private LocalDateTime creationTime = LocalDateTime.now();
 
 }
