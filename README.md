@@ -32,7 +32,7 @@ Before running the project, ensure the following tools are installed:
 
 #### 3. Run with Docker Compose:
    ```sh
-  docker compose up --build
+  docker compose up
    ```
 
 #### 4. Access the Application:
