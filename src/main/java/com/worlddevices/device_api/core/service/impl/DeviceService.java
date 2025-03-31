@@ -82,11 +82,10 @@ public class DeviceService implements IDeviceService {
     @Override
     public ResponseEntity<DeviceResponse> getDeviceById(Long id) {
         log.info("Fetching device with ID: {}", id);
-        Optional<DeviceEntity> device = repository.findById(id);
-        if(device.isPresent()){
-            return ResponseEntity.ok(mapper.convertToDeviceResponse(device.get()));
-        }
-        return ResponseEntity.noContent().build();
+        DeviceEntity device =
+                repository.findById(id).orElseThrow(() -> new EntityNotFoundException(DEVICE_NOT_FOUND));
+
+        return ResponseEntity.ok(mapper.convertToDeviceResponse(device));
     }
 
     @Override

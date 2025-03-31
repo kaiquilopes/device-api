@@ -251,7 +251,7 @@ class DeviceServiceTest {
     void getDeviceByIdDeviceNotFoundTest(){
         when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
-        service.getDeviceById(1L);
+        assertThrows(EntityNotFoundException.class, () -> service.getDeviceById(1L));
         verify(repository, times(1)).findById(anyLong());
         verify(mapper, never()).convertToDeviceResponse(any(DeviceEntity.class));
     }
