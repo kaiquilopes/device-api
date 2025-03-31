@@ -1,6 +1,7 @@
 package com.worlddevices.device_api.core.service.impl;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
+import com.worlddevices.device_api.api.dto.request.DeviceStateUpdateRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
 import com.worlddevices.device_api.api.mapper.MapperConverter;
 import com.worlddevices.device_api.core.domain.DeviceEntity;
@@ -64,7 +65,8 @@ public class DeviceService implements IDeviceService {
     }
 
     @Override
-    public ResponseEntity<Void> updateDeviceStateById(Long id, StateDeviceEnum state) {
+    public ResponseEntity<Void> updateDeviceStateById(Long id, DeviceStateUpdateRequest stateUpdateRequest) {
+        StateDeviceEnum state = stateUpdateRequest.state();
         log.info("Updating device ID: {} to state {}", id, state);
         DeviceEntity device =
                 repository.findById(id).orElseThrow(() -> new EntityNotFoundException(DEVICE_NOT_FOUND));

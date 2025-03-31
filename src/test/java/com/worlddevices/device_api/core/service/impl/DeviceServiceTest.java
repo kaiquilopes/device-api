@@ -1,6 +1,7 @@
 package com.worlddevices.device_api.core.service.impl;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
+import com.worlddevices.device_api.api.dto.request.DeviceStateUpdateRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
 import com.worlddevices.device_api.api.mapper.MapperConverter;
 import com.worlddevices.device_api.core.domain.DeviceEntity;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -21,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -158,9 +160,23 @@ class DeviceServiceTest {
 
     @Test
     void getDeviceByIdTest(){
-        when(repository.findById(anyLong())).thenReturn(Optional.of(buildDeviceEntity(StateDeviceEnum.IN_USE)));
+        DeviceEntity deviceEntity = buildDeviceEntity(StateDeviceEnum.IN_USE);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(deviceEntity));
 
-        service.getDeviceById(1L);
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "iPhone 15", "Apple", StateDeviceEnum.IN_USE, LocalDateTime.now());
+        when(mapper.convertToDeviceResponse(any(DeviceEntity.class))).thenReturn(deviceResponse);
+
+        ResponseEntity<DeviceResponse> response = service.getDeviceById(1L);
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse actualResponse = response.getBody();
+        assertEquals(deviceEntity.getId(), actualResponse.id());
+        assertEquals(deviceEntity.getName(), actualResponse.name());
+        assertEquals(deviceEntity.getBrand(), actualResponse.brand());
+        assertEquals(deviceEntity.getState(), actualResponse.state());
+
         verify(repository, times(1)).findById(anyLong());
         verify(mapper, times(1)).convertToDeviceResponse(any(DeviceEntity.class));
     }
@@ -179,7 +195,7 @@ class DeviceServiceTest {
 
         when(repository.findById(anyLong())).thenReturn(Optional.of(buildDeviceEntity(StateDeviceEnum.INACTIVE)));
 
-        service.updateDeviceStateById(1L, StateDeviceEnum.AVAILABLE);
+        service.updateDeviceStateById(1L, new DeviceStateUpdateRequest(StateDeviceEnum.AVAILABLE));
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(1)).save(any(DeviceEntity.class));
     }
@@ -189,7 +205,8 @@ class DeviceServiceTest {
 
         when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> service.updateDeviceStateById(1L, StateDeviceEnum.IN_USE));
+        assertThrows(EntityNotFoundException.class, () ->
+                service.updateDeviceStateById(1L, new DeviceStateUpdateRequest(StateDeviceEnum.IN_USE)));
         verify(repository, times(1)).findById(anyLong());
         verify(repository, never()).save(any(DeviceEntity.class));
     }
@@ -212,22 +229,53 @@ class DeviceServiceTest {
     @Test
     void updateDeviceByIdCanUpdateTest() {
 
-        when(repository.findById(anyLong())).thenReturn(Optional.of(buildDeviceEntity(StateDeviceEnum.AVAILABLE)));
+        DeviceEntity deviceEntity = buildDeviceEntity(StateDeviceEnum.AVAILABLE);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(deviceEntity));
+
         when(stateBehaviorContext.getStrategy(any(StateDeviceEnum.class)))
                 .thenReturn(buildStateBehaviorStrategyAvailable(true, false));
 
-        service.updateDeviceById(1L, new DeviceRequest("ThinkPad X1", "Lenovo", StateDeviceEnum.IN_USE));
+        DeviceEntity updatedDeviceEntity = buildDeviceEntity(StateDeviceEnum.IN_USE);
+        updatedDeviceEntity.setName("ThinkPad X1");
+        updatedDeviceEntity.setBrand("Lenovo");
+        when(repository.save(any(DeviceEntity.class))).thenReturn(updatedDeviceEntity);
+
+        DeviceResponse deviceResponse = new DeviceResponse(
+                1L, "ThinkPad X1", "Lenovo", StateDeviceEnum.AVAILABLE, LocalDateTime.now());
+        when(mapper.convertToDeviceResponse(any(DeviceEntity.class))).thenReturn(deviceResponse);
+
+        ResponseEntity<DeviceResponse> response = service.updateDeviceById(1L,
+                new DeviceRequest("ThinkPad X1", "Lenovo", StateDeviceEnum.AVAILABLE));
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse actualResponse = response.getBody();
+        assertEquals(deviceEntity.getState(), actualResponse.state());
+        assertNotNull(actualResponse.creationTime());
+
         verify(repository, times(1)).findById(anyLong());
+        verify(stateBehaviorContext, times(1)).getStrategy(any(StateDeviceEnum.class));
+        verify(repository, times(1)).save(any(DeviceEntity.class));
         verify(mapper, times(1)).convertToDeviceResponse(any(DeviceEntity.class));
     }
 
     @Test
     void saveTest() {
         when(mapper.convertToDeviceEntity(any(DeviceRequest.class))).thenReturn(new DeviceEntity());
-        when(mapper.convertToDeviceResponse(any(DeviceEntity.class))).thenReturn(buildDeviceResponse());
+
+        DeviceResponse deviceResponse = buildDeviceResponse();
+        when(mapper.convertToDeviceResponse(any(DeviceEntity.class))).thenReturn(deviceResponse);
         when(repository.save(any(DeviceEntity.class))).thenReturn(buildDeviceEntity(StateDeviceEnum.AVAILABLE));
 
-        service.save(new DeviceRequest("ThinkPad X1", "Lenovo", StateDeviceEnum.IN_USE));
+        ResponseEntity<DeviceResponse> response =
+                service.save(new DeviceRequest("ThinkPad X1", "Lenovo", StateDeviceEnum.IN_USE));
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+
+        DeviceResponse actualResponse = response.getBody();
+        assertEquals(deviceResponse.brand(), actualResponse.brand());
+        assertNotNull(actualResponse.creationTime());
+
         verify(mapper, times(1)).convertToDeviceEntity(any(DeviceRequest.class));
         verify(mapper, times(1)).convertToDeviceResponse(any(DeviceEntity.class));
         verify(repository, times(1)).save(any(DeviceEntity.class));

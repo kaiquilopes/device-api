@@ -1,8 +1,8 @@
 package com.worlddevices.device_api.core.service;
 
 import com.worlddevices.device_api.api.dto.request.DeviceRequest;
+import com.worlddevices.device_api.api.dto.request.DeviceStateUpdateRequest;
 import com.worlddevices.device_api.api.dto.response.DeviceResponse;
-import com.worlddevices.device_api.core.enums.StateDeviceEnum;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public interface IDeviceService {
 
     ResponseEntity<DeviceResponse> updateDeviceById(Long id, DeviceRequest device);
 
-    ResponseEntity updateDeviceStateById(Long id, StateDeviceEnum state);
+    ResponseEntity updateDeviceStateById(Long id, DeviceStateUpdateRequest stateUpdateRequest);
 
     ResponseEntity<DeviceResponse> getDeviceById(Long id);
 

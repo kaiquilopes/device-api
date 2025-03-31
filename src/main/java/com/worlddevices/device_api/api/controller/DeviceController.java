@@ -44,7 +44,7 @@ public class DeviceController implements IDeviceControllerOpenApi {
     public ResponseEntity<Void> updateDeviceStateById(
             @PathVariable Long id, @RequestBody @Valid DeviceStateUpdateRequest request) {
         log.info("Request to update device state by id: {} with state details: {}", id, request.state());
-        return service.updateDeviceStateById(id, request.state());
+        return service.updateDeviceStateById(id, request);
     }
 
     @Override
