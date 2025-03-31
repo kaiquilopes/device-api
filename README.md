@@ -3,23 +3,21 @@ This project is a Spring Boot application that provides RESTful endpoints for ma
 ___
 ## Table of Contents
 
-   - Project Setup
-   - Docker
-   - API Endpoints
-   - Swagger Documentation
-   - MySQL Database
-   - Code Structure
-   - Design Patterns
-   - SOLID Principles
-   - Customization
+   - [Project Setup](#project-setup)
+   - [Docker](#docker)
+   - [API Endpoints](#api-endpoints)
+   - [Swagger Documentation](#swagger-documentation)
+   - [MySQL Database](#mysql-database)
+   - [Code Structure](#code-structure)
+   - [Design Patterns](#design-patterns)
+   - [SOLID Principles](#solid-principles)
+   - [Customization](#customization)
+   - [Contributors](#contributors) 
 ___
 ## Project Setup
 ### Prerequisites
 Before running the project, ensure the following tools are installed:
-   - Java 21: Download Java 21
-   - Maven 3.9.9: Download Maven
-   - Docker + Docker Compose: Install Docker
-   - MySQL 8.0: Included in Docker setup.
+   - Docker + Docker Compose: [Install Docker](https://docs.docker.com/get-started/get-docker/)
 
 ### Running the Application
 #### 1. Clone the Repository:
@@ -90,7 +88,6 @@ The API documentation is available through Swagger.
 ## MySQL Database
 The project uses MySQL as the database. The `application.properties` file defines the database configuration
 
-
 ## Code Structure
 The project follows a clean and modular structure:
 src/main/java/com/worlddevices/device_api/
@@ -114,7 +111,6 @@ src/main/java/com/worlddevices/device_api/
 ?
 ??? DeviceApiApplication.java     # Main application class
 
-
 ## Design Patterns
 ### Strategy Pattern
 The Strategy pattern is used to manage device state behavior in a flexible and extensible way. Each state (AVAILABLE, IN_USE, INACTIVE) has its own strategy implementation that defines what actions are allowed (canUpdate, canDelete) and how updates are handled (handleUpdate).
@@ -128,7 +124,6 @@ The Strategy pattern is used to manage device state behavior in a flexible and e
    * InactiveStateBehavior: Handles behavior for devices in the INACTIVE state.
 3. Context (StateBehaviorContext):
    * Manages the current strategy based on the device's state.
-
 
 ## SOLID Principles
 The project adheres to the SOLID principles, ensuring a clean, maintainable, and scalable design:
