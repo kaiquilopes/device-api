@@ -1,0 +1,16 @@
+server:
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: device-api
+  datasource:
+    url: jdbc:mysql://db:3306/world_devices
+    username: root
+    password: q1w2e3r4t5
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
